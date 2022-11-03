@@ -1,37 +1,50 @@
 #!/usr/bin/python3
-"""Query Reddit API to determine subreddit sub count
-"""
+""" Module for a function that queries the Reddit API recursively."""
+
 
 import requests
 
 
-def recurse(subreddit, hot_list=[], next_page=None, count=0):
-    """Request subreddit recursively using pagination
+def count_words(subreddit, word_list, after='', word_dict={}):
+    """ A function that queries the Reddit API parses the title of
+    all hot articles, and prints a sorted count of given keywords
+    (case-insensitive, delimited by spaces.
+    Javascript should count as javascript, but java should not).
+    If no posts match or the subreddit is invalid, it prints nothing.
     """
-    # set custom user-agent
-    user_agent = '0x16-api_advanced-nathanabe'
-    url = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
-    # if page specified, pass as parameter
-    if next_page:
-        url += '?after={}'.format(next_page)
-    headers = {'User-Agent': user_agent}
 
-    r = requests.get(url, headers=headers, allow_redirects=False)
+    if not word_dict:
+        for word in word_list:
+            if word.lower() not in word_dict:
+                word_dict[word.lower()] = 0
 
-    if r.status_code != 200:
+    if after is None:
+        wordict = sorted(word_dict.items(), key=lambda x: (-x[1], x[0]))
+        for word in wordict:
+            if word[1]:
+                print('{}: {}'.format(word[0], word[1]))
         return None
 
-    # load response unit from json
-    data = r.json()['data']
+    url = 'https://www.reddit.com/r/{}/hot/.json'.format(subreddit)
+    header = {'user-agent': 'redquery'}
+    parameters = {'limit': 100, 'after': after}
+    response = requests.get(url, headers=header, params=parameters,
+                            allow_redirects=False)
 
-    # extract list of pages
-    posts = data['children']
-    for post in posts:
-        count += 1
-        hot_list.append(post['data']['title'])
+    if response.status_code != 200:
+        return None
 
-    next_page = data['after']
-    if next_page is not None:
-        return recurse(subreddit, hot_list, next_page, count)
-    else:
-        return hot_list
+    try:
+        hot = response.json()['data']['children']
+        aft = response.json()['data']['after']
+        for post in hot:
+            title = post['data']['title']
+            lower = [word.lower() for word in title.split(' ')]
+
+            for word in word_dict.keys():
+                word_dict[word] += lower.count(word)
+
+    except Exception:
+        return None
+
+    count_words(subreddit, word_list, aft, word_dict)
