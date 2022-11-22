@@ -33,7 +33,7 @@ All of the following folders are projects done during the studies:
 | [`Attack Is The Best Defense](https://github.com/nathanabe/alx-system_engineering-devops/tree/master/attack_is_the_best_defense) | . |
 
 ## Author :
-* **[Nathan Adehor](https://twitter.com/nathanabe)** <[Aysuarex](https://github.com/nathanabe)>
+* **[Nathan Adehor](https://twitter.com/nathanabe)** <[Nathanabe](https://github.com/nathanabe)>
 
 ## Acknowledgements :pray:
 
